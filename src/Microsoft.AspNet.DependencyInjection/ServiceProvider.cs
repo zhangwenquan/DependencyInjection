@@ -1,25 +1,26 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Microsoft.AspNet.DependencyInjection
 {
     /// <summary>
     /// The default IServiceProvider.
     /// </summary>
-    public class ServiceProvider : IServiceProvider
+    public class ServiceProvider : IServiceProvider, IServiceFactoryProvider
     {
-        private readonly IDictionary<Type, Func<object>> _services = new Dictionary<Type, Func<object>>();
-        private readonly IDictionary<Type, List<Func<object>>> _priorServices = new Dictionary<Type, List<Func<object>>>();
+        private readonly IDictionary<Type, Func<IServiceProvider, object>> _services = new Dictionary<Type, Func<IServiceProvider, object>>();
+        private readonly IDictionary<Type, List<Func<IServiceProvider, object>>> _priorServices = new Dictionary<Type, List<Func<IServiceProvider, object>>>();
 
         /// <summary>
         /// 
         /// </summary>
         public ServiceProvider()
         {
-            _services[typeof(IServiceProvider)] = () => this;
+            // Why do we need to register the IServiceProvider with itself?
+            _services[typeof(IServiceProvider)] = _ => this;
         }
 
         /// <summary>
@@ -29,43 +30,75 @@ namespace Microsoft.AspNet.DependencyInjection
         /// <returns></returns>
         public virtual object GetService(Type serviceType)
         {
-            return GetSingleService(serviceType) ?? GetMultiService(serviceType);
+            Func<IServiceProvider, object> serviceFactory;
+            if (TryGetSingleServiceFactory(serviceType, out serviceFactory))
+            {
+                return serviceFactory(this);
+            }
+
+            Func<IServiceProvider, IList> multiServiceFactory;
+            if (TryGetMultiServiceFactory(serviceType, out multiServiceFactory))
+            {
+                return multiServiceFactory(this);
+            }
+
+            return null;
         }
 
-        private object GetSingleService(Type serviceType)
+        protected bool TryGetSingleServiceFactory(Type serviceType, out Func<IServiceProvider, object> serviceFactory)
         {
-            Func<object> serviceFactory;
-            return _services.TryGetValue(serviceType, out serviceFactory)
-                ? serviceFactory.Invoke()
-                : null;
+            return _services.TryGetValue(serviceType, out serviceFactory);
         }
 
-        private object GetMultiService(Type collectionType)
+        bool IServiceFactoryProvider.TryGetSingleServiceFactory(Type serviceType, out Func<IServiceProvider, object> serviceFactory)
+        {
+            return TryGetSingleServiceFactory(serviceType, out serviceFactory);
+        }
+
+        protected bool TryGetMultiServiceFactory(Type collectionType, out Func<IServiceProvider, IList> multiServiceFactory)
         {
             if (collectionType.GetTypeInfo().IsGenericType &&
                 collectionType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
+                var serviceFactories = new List<Func<IServiceProvider, object>>();
+
                 Type serviceType = collectionType.GetTypeInfo().GenericTypeArguments.Single();
                 Type listType = typeof(List<>).MakeGenericType(serviceType);
-                var services = (IList)Activator.CreateInstance(listType);
 
-                Func<object> serviceFactory;
+                Func<IServiceProvider, object> serviceFactory;
                 if (_services.TryGetValue(serviceType, out serviceFactory))
                 {
-                    services.Add(serviceFactory());
+                    serviceFactories.Add(serviceFactory);
 
-                    List<Func<object>> prior;
+                    List<Func<IServiceProvider, object>> prior;
                     if (_priorServices.TryGetValue(serviceType, out prior))
                     {
-                        foreach (var factory in prior)
-                        {
-                            services.Add(factory());
-                        }
+                        serviceFactories.AddRange(prior);
                     }
                 }
-                return services;
+
+                multiServiceFactory = serviceProvider =>
+                {
+                    var services = (IList)Activator.CreateInstance(listType);
+
+                    foreach (var factory in serviceFactories)
+                    {
+                        services.Add(factory(serviceProvider));
+                    }
+
+                    return services;
+                };
+
+                return true;
             }
-            return null;
+
+            multiServiceFactory = null;
+            return false;
+        }
+
+        bool IServiceFactoryProvider.TryGetMultiServiceFactory(Type collectionType, out Func<IServiceProvider, IList> multiServiceFactory)
+        {
+            return TryGetMultiServiceFactory(collectionType, out multiServiceFactory);
         }
 
         /// <summary>
@@ -109,7 +142,7 @@ namespace Microsoft.AspNet.DependencyInjection
         /// <returns></returns>
         public virtual ServiceProvider AddInstance(Type service, object instance)
         {
-            return Add(service, () => instance);
+            return Add(service, _ => instance);
         }
 
         /// <summary>
@@ -132,7 +165,7 @@ namespace Microsoft.AspNet.DependencyInjection
         public virtual ServiceProvider Add(Type serviceType, Type implementationType)
         {
             Func<IServiceProvider, object> factory = ActivatorUtilities.CreateFactory(implementationType);
-            return Add(serviceType, () => factory(this));
+            return Add(serviceType, factory);
         }
 
         /// <summary>
@@ -141,19 +174,19 @@ namespace Microsoft.AspNet.DependencyInjection
         /// <param name="serviceType"></param>
         /// <param name="serviceFactory"></param>
         /// <returns></returns>
-        public virtual ServiceProvider Add(Type serviceType, Func<object> serviceFactory)
+        public virtual ServiceProvider Add(Type serviceType, Func<IServiceProvider, object> serviceFactory)
         {
-            Func<object> existing;
+            Func<IServiceProvider, object> existing;
             if (_services.TryGetValue(serviceType, out existing))
             {
-                List<Func<object>> prior;
+                List<Func<IServiceProvider, object>> prior;
                 if (_priorServices.TryGetValue(serviceType, out prior))
                 {
                     prior.Add(existing);
                 }
                 else
                 {
-                    prior = new List<Func<object>> { existing };
+                    prior = new List<Func<IServiceProvider, object>> { existing };
                     _priorServices.Add(serviceType, prior);
                 }
             }
