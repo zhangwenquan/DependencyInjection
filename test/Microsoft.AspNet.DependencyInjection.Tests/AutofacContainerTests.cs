@@ -88,6 +88,26 @@ namespace Microsoft.AspNet.DependencyInjection.Tests
             Assert.True(disposableService.Disposed);
         }
 
+        [Fact(Skip="Disposing an outer scope doesn't actually dispose its inner scopes in Autofac")]
+        public void DisposingScopeDisposesNestedScope()
+        {
+            var container = CreateContainer();
+            FakeService disposableService;
+
+            var outerScopeFactory = container.GetService<IServiceScopeFactory>();
+            using (var outerScope = outerScopeFactory.CreateScope())
+            {
+                var innerScopeFactory = outerScope.ServiceProvider.GetService<IServiceScopeFactory>();
+                var innerScope = innerScopeFactory.CreateScope();
+
+                disposableService = (FakeService)innerScope.ServiceProvider.GetService<IFakeScopedService>();
+
+                Assert.False(disposableService.Disposed);
+            }
+
+            Assert.True(disposableService.Disposed);
+        }
+
         [Fact]
         public void ServicesCanBeResolvedFromFallbackServiceProvider()
         {
