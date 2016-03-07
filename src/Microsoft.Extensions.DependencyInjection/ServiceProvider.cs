@@ -26,10 +26,15 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static readonly Func<Type, ServiceProvider, Func<ServiceProvider, object>> _createServiceAccessor = CreateServiceAccessor;
 
-        public ServiceProvider(IEnumerable<ServiceDescriptor> serviceDescriptors)
+
+        private static MethodInfo TrasientMethodInfo = GetMethodInfo<Func<ServiceProvider, object, object>>((a, b) => a.Transient(b));
+        private static MethodInfo ScopedMethodInfo = GetMethodInfo<Func<ServiceProvider, IService, Func<object>, object>>((sp, key, factory) => sp.Scoped(key, factory));
+        private static MethodInfo SingletonMethodInfo = GetMethodInfo<Func<ServiceProvider, IService, Func<object>, object>>((sp, key, factory) => sp.Singleton(key, factory));
+
+        public ServiceProvider(IEnumerable<ServiceDescriptor> serviceDescriptors, IEnumerable<IService> builtServices = null)
         {
             _root = this;
-            _table = new ServiceTable(serviceDescriptors);
+            _table = new ServiceTable(serviceDescriptors, builtServices);
 
             _table.Add(typeof(IServiceProvider), new ServiceProviderService());
             _table.Add(typeof(IServiceScopeFactory), new ServiceScopeService());
@@ -57,11 +62,11 @@ namespace Microsoft.Extensions.DependencyInjection
             return realizedService.Invoke(this);
         }
 
-        public string GetServiceExpression(Type serviceType, string providerExpression)
+        public Expression GetServiceExpression(Type serviceType)
         {
             var callSite = GetServiceCallSite(serviceType, new HashSet<Type>());
 
-            return callSite.Build("this", providerExpression);
+            return GetExpression(callSite);
         }
 
         private static Func<ServiceProvider, object> CreateServiceAccessor(Type serviceType, ServiceProvider serviceProvider)
@@ -104,7 +109,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return lambdaExpression;
         }
 
-        internal IServiceCallSite GetServiceCallSite(Type serviceType, ISet<Type> callSiteChain)
+        public IServiceCallSite GetServiceCallSite(Type serviceType, ISet<Type> callSiteChain)
         {
             try
             {
@@ -186,7 +191,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
 
-        private object CaptureDisposable(object service)
+        private object Transient(object service)
         {
             if (!object.ReferenceEquals(this, service))
             {
@@ -207,21 +212,12 @@ namespace Microsoft.Extensions.DependencyInjection
             return service;
         }
 
-        private object GetEmptyIEnumerableOrNull(Type serviceType)
+        private object Singleton(IService key, Func<object> getter)
         {
-            var typeInfo = serviceType.GetTypeInfo();
-
-            if (typeInfo.IsGenericType &&
-                serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-            {
-                var itemType = typeInfo.GenericTypeArguments[0];
-                return Array.CreateInstance(itemType, 0);
-            }
-
-            return null;
+            return _root.Scoped(key, getter);
         }
 
-        private object GetOrAdd(IService key, Func<object> getter)
+        private object Scoped(IService key, Func<object> getter)
         {
             object resolved;
             lock (_resolvedServices)
@@ -235,8 +231,20 @@ namespace Microsoft.Extensions.DependencyInjection
             return resolved;
         }
 
-        private static MethodInfo CaptureDisposableMethodInfo = GetMethodInfo<Func<ServiceProvider, object, object>>((a, b) => a.CaptureDisposable(b));
-        private static MethodInfo GetOrAddMethodInfo = GetMethodInfo<Func<ServiceProvider, IService, Func<object>, object>>((sp, key, factory) => sp.GetOrAdd(key, factory));
+
+        private object GetEmptyIEnumerableOrNull(Type serviceType)
+        {
+            var typeInfo = serviceType.GetTypeInfo();
+
+            if (typeInfo.IsGenericType &&
+                serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var itemType = typeInfo.GenericTypeArguments[0];
+                return Array.CreateInstance(itemType, 0);
+            }
+
+            return null;
+        }
 
         private static MethodInfo GetMethodInfo<T>(Expression<T> expr)
         {
@@ -264,11 +272,6 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 return Expression.Constant(_serviceInstance, _serviceType);
             }
-
-            public string Build(string thisExpression, string providerExpression)
-            {
-                return $"Array.Empty<{_serviceType.FullName}>()";
-            }
         }
 
         private class TransientCallSite : IServiceCallSite
@@ -282,20 +285,15 @@ namespace Microsoft.Extensions.DependencyInjection
 
             public object Invoke(ServiceProvider provider)
             {
-                return provider.CaptureDisposable(_service.Invoke(provider));
+                return provider.Transient(_service.Invoke(provider));
             }
 
             public Expression Build(Expression provider)
             {
                 return Expression.Call(
                     provider,
-                    CaptureDisposableMethodInfo,
+                    TrasientMethodInfo,
                     _service.Build(provider));
-            }
-
-            public string Build(string thisExpression, string providerExpression)
-            {
-                return $"{providerExpression}.CaptureDisposable({_service.Build(thisExpression, providerExpression)})";
             }
         }
 
@@ -310,9 +308,40 @@ namespace Microsoft.Extensions.DependencyInjection
                 _serviceCallSite = serviceCallSite;
             }
 
+            public object Invoke(ServiceProvider provider)
+            {
+                return provider.Scoped(_key, () => _serviceCallSite.Invoke(provider));
+            }
+
+            public Expression Build(Expression providerExpression)
+            {
+                var keyExpression = Expression.Constant(
+                    _key,
+                    typeof(IService));
+
+                var factoryExpression = Expression.Lambda(_serviceCallSite.Build(providerExpression));
+
+                return Expression.Call(providerExpression,
+                    ScopedMethodInfo,
+                    keyExpression,
+                    factoryExpression);
+            }
+        }
+
+        private class SingletonCallSite : IServiceCallSite
+        {
+            private readonly IService _key;
+            private readonly IServiceCallSite _serviceCallSite;
+
+            public SingletonCallSite(IService key, IServiceCallSite serviceCallSite)
+            {
+                _key = key;
+                _serviceCallSite = serviceCallSite;
+            }
+
             public virtual object Invoke(ServiceProvider provider)
             {
-                return provider.GetOrAdd(_key, () => _serviceCallSite.Invoke(provider));
+                return provider.Singleton(_key, () => _serviceCallSite.Invoke(provider));
             }
 
             public virtual Expression Build(Expression providerExpression)
@@ -324,36 +353,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 var factoryExpression = Expression.Lambda(_serviceCallSite.Build(providerExpression));
 
                 return Expression.Call(providerExpression,
-                    GetOrAddMethodInfo,
+                    SingletonMethodInfo,
                     keyExpression,
                     factoryExpression);
-            }
-
-            public virtual string Build(string thisExpression, string providerExpression)
-            {
-                return $"{providerExpression}.GetOrAdd(typeof({_key.ServiceType.FullName}), () => {_serviceCallSite.Build(thisExpression, providerExpression)})";
-            }
-        }
-
-        private class SingletonCallSite : ScopedCallSite
-        {
-            public SingletonCallSite(IService key, IServiceCallSite serviceCallSite) : base(key, serviceCallSite)
-            {
-            }
-
-            public override object Invoke(ServiceProvider provider)
-            {
-                return base.Invoke(provider._root);
-            }
-
-            public override Expression Build(Expression provider)
-            {
-                return base.Build(Expression.Field(provider, "_root"));
-            }
-
-            public override string Build(string thisExpression, string providerExpression)
-            {
-                return base.Build(thisExpression, $"{providerExpression}._root");
             }
         }
     }

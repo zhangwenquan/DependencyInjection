@@ -8,12 +8,10 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
     /// <summary>
     /// Summary description for IServiceCallSite
     /// </summary>
-    internal interface IServiceCallSite
+    public interface IServiceCallSite
     {
         object Invoke(ServiceProvider provider);
 
         Expression Build(Expression provider);
-
-        string Build(string thisExpression, string providerExpression);
     }
 }

@@ -70,12 +70,6 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
                             callSite.Build(provider),
                             _itemType)));
             }
-
-            public string Build(string thisExpression, string providerExpression)
-            {
-                // This can be made to work
-                throw new NotSupportedException();
-            }
         }
     }
 }

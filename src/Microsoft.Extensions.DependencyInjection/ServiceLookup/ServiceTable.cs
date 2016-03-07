@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 
 namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
@@ -17,13 +18,20 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
         private readonly Dictionary<Type, List<IGenericService>> _genericServices;
         private readonly ConcurrentDictionary<Type, Func<ServiceProvider, object>> _realizedServices = new ConcurrentDictionary<Type, Func<ServiceProvider, object>>();
 
-        public ServiceTable(IEnumerable<ServiceDescriptor> descriptors)
+        public ServiceTable(IEnumerable<ServiceDescriptor> descriptors, IEnumerable<IService> builtServices = null)
         {
             _services = new Dictionary<Type, ServiceEntry>();
             _genericServices = new Dictionary<Type, List<IGenericService>>();
 
+            var overrides = (builtServices ?? Enumerable.Empty<IService>()).ToDictionary(s => s.ServiceType);
+
             foreach (var descriptor in descriptors)
             {
+                if (overrides.ContainsKey(descriptor.ServiceType))
+                {
+                    continue;
+                }
+
                 var serviceTypeInfo = descriptor.ServiceType.GetTypeInfo();
                 if (serviceTypeInfo.IsGenericTypeDefinition)
                 {
@@ -74,6 +82,11 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 
                     Add(descriptor.ServiceType, new Service(descriptor));
                 }
+            }
+
+            foreach (var service in overrides)
+            {
+                Add(service.Key, service.Value);
             }
         }
 

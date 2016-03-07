@@ -54,22 +54,23 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
                         parameters[index].ParameterType)));
         }
 
-        public string Build(string  thisExpression, string providerExpression)
+        public string Build()
         {
-            var parameters = _constructorInfo.GetParameters();
-            var sb = new StringBuilder();
-            sb.Append($"new {_constructorInfo.DeclaringType}(");
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.Append(",");
-                }
-                var type = parameters[i].ParameterType.ToString().Replace('.', '_');
-                sb.Append($"{thisExpression}.Get{type}({providerExpression})");
-            }
-            sb.Append(")");
-            return sb.ToString();
+            //var parameters = _constructorInfo.GetParameters();
+            //var sb = new StringBuilder();
+            //sb.Append($"new {_constructorInfo.DeclaringType}(");
+            //for (int i = 0; i < parameters.Length; i++)
+            //{
+            //    if (i > 0)
+            //    {
+            //        sb.Append(",");
+            //    }
+            //    var type = parameters[i].ParameterType.ToString().Replace('.', '_');
+            //    sb.Append($"{thisExpression}.Get{type}({providerExpression})");
+            //}
+            //sb.Append(")");
+            //return sb.ToString();
+            return null;
         }
     }
 }

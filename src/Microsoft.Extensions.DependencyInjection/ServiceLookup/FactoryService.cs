@@ -42,10 +42,5 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 
             return Expression.Invoke(factory, provider);
         }
-
-        public string Build(string thisExpression, string providerExpression)
-        {
-            return $"{providerExpression}.GetService(typeof({ServiceType}))";
-        }
     }
 }
