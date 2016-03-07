@@ -1,53 +1,57 @@
-public class MyAppContainer : ConsoleApp1.Container
+using System.Linq.Expressions;
+
+public class MyAppContainer
 {
-    public MyAppContainer()
+    public static System.Collections.Generic.IEnumerable<Microsoft.Extensions.DependencyInjection.ServiceLookup.IService> GetServices()
     {
+        yield return new ConsoleApp1_IFooService();
+        yield return new ConsoleApp1_IBarService();
     }
 
-    public MyAppContainer(ConsoleApp1.Container container) : base(container)
+    private class ConsoleApp1_IFooService : Microsoft.Extensions.DependencyInjection.ServiceLookup.IService, Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite
     {
-    }
-
-    protected override object GetService(System.Type serviceType)
-    {
-        if (serviceType == typeof(ConsoleApp1.IFoo))
+        private Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite _bar;
+        private Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite _z;
+        public System.Type ServiceType => typeof(ConsoleApp1.IFoo);
+        public Microsoft.Extensions.DependencyInjection.ServiceLookup.IService Next { get; set; }
+        public Microsoft.Extensions.DependencyInjection.ServiceLifetime Lifetime => Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient;
+        public Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite CreateCallSite(Microsoft.Extensions.DependencyInjection.ServiceProvider provider, System.Collections.Generic.ISet<System.Type> callSiteChain)
         {
-            return GetConsoleApp1_IFoo();
+            _bar = provider.GetServiceCallSite(typeof(ConsoleApp1.IBar), callSiteChain);
+            _z = provider.GetServiceCallSite(typeof(ConsoleApp1.IBaz), callSiteChain);
+            return this;
+        }
+        public object Invoke(Microsoft.Extensions.DependencyInjection.ServiceProvider provider)
+        {
+            return new ConsoleApp1.Foo((ConsoleApp1.IBar)_bar.Invoke(provider), (ConsoleApp1.IBaz)_z.Invoke(provider));
         }
 
-        if (serviceType == typeof(ConsoleApp1.IBar))
+        public System.Linq.Expressions.Expression Build(System.Linq.Expressions.Expression provider)
         {
-            return GetConsoleApp1_IBar();
+            return provider;
+        }
+    }
+
+    private class ConsoleApp1_IBarService : Microsoft.Extensions.DependencyInjection.ServiceLookup.IService, Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite
+    {
+        private Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite _z;
+        public System.Type ServiceType => typeof(ConsoleApp1.IBar);
+        public Microsoft.Extensions.DependencyInjection.ServiceLookup.IService Next { get; set; }
+        public Microsoft.Extensions.DependencyInjection.ServiceLifetime Lifetime => Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped;
+        public Microsoft.Extensions.DependencyInjection.ServiceLookup.IServiceCallSite CreateCallSite(Microsoft.Extensions.DependencyInjection.ServiceProvider provider, System.Collections.Generic.ISet<System.Type> callSiteChain)
+        {
+            _z = provider.GetServiceCallSite(typeof(ConsoleApp1.IBaz), callSiteChain);
+            return this;
+        }
+        public object Invoke(Microsoft.Extensions.DependencyInjection.ServiceProvider provider)
+        {
+            return new ConsoleApp1.Bar((ConsoleApp1.IBaz)_z.Invoke(provider));
         }
 
-        if (serviceType == typeof(ConsoleApp1.IBaz))
+        public System.Linq.Expressions.Expression Build(System.Linq.Expressions.Expression provider)
         {
-            return GetConsoleApp1_IBaz();
+            return provider;
         }
-
-        return base.GetService(serviceType);
-    }
-
-    public ConsoleApp1.IFoo GetConsoleApp1_IFoo()
-    {
-        return new ConsoleApp1.Foo(Resolve<ConsoleApp1.IBar>(), Resolve<ConsoleApp1.IBaz>());
-    }
-
-    public ConsoleApp1.IBar GetConsoleApp1_IBar()
-    {
-        return new ConsoleApp1.Bar(Resolve<ConsoleApp1.IBaz>());
-    }
-
-    public ConsoleApp1.IBaz GetConsoleApp1_IBaz()
-    {
-        return new ConsoleApp1.Baz();
-    }
-
-    protected override void Populate(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
-    {
-        services.Add(new Microsoft.Extensions.DependencyInjection.ServiceDescriptor(typeof(ConsoleApp1.IFoo), _ => GetConsoleApp1_IFoo(), Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient));
-        services.Add(new Microsoft.Extensions.DependencyInjection.ServiceDescriptor(typeof(ConsoleApp1.IBar), _ => GetConsoleApp1_IBar(), Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped));
-        services.Add(new Microsoft.Extensions.DependencyInjection.ServiceDescriptor(typeof(ConsoleApp1.IBaz), _ => GetConsoleApp1_IBaz(), Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton));
     }
 
 }
