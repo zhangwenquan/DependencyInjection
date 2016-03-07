@@ -34,5 +34,10 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
         {
             return Expression.New(_descriptor.ImplementationType);
         }
+
+        public string Build(string thisExpression, string providerExpression)
+        {
+            return $"new {_descriptor.ImplementationType}()";
+        }
     }
 }

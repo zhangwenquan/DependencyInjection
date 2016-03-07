@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using System.Text;
 
 namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 {
@@ -51,6 +52,24 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
                     Expression.Convert(
                         callSite.Build(provider),
                         parameters[index].ParameterType)));
+        }
+
+        public string Build(string  thisExpression, string providerExpression)
+        {
+            var parameters = _constructorInfo.GetParameters();
+            var sb = new StringBuilder();
+            sb.Append($"new {_constructorInfo.DeclaringType}(");
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(",");
+                }
+                var type = parameters[i].ParameterType.ToString().Replace('.', '_');
+                sb.Append($"{thisExpression}.Get{type}({providerExpression})");
+            }
+            sb.Append(")");
+            return sb.ToString();
         }
     }
 }

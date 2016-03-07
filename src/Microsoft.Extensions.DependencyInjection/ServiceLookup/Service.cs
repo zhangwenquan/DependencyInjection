@@ -18,6 +18,8 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
             _descriptor = descriptor;
         }
 
+        public Type ServiceType => _descriptor.ServiceType;
+
         public IService Next { get; set; }
 
         public ServiceLifetime Lifetime

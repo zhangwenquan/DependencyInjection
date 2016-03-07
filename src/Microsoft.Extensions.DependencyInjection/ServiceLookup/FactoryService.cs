@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
             _descriptor = descriptor;
         }
 
+        public Type ServiceType => _descriptor.ServiceType;
+
         public IService Next { get; set; }
 
         public ServiceLifetime Lifetime
@@ -39,6 +41,11 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
                 serviceProvider => _descriptor.ImplementationFactory(serviceProvider);
 
             return Expression.Invoke(factory, provider);
+        }
+
+        public string Build(string thisExpression, string providerExpression)
+        {
+            return $"{providerExpression}.GetService(typeof({ServiceType}))";
         }
     }
 }

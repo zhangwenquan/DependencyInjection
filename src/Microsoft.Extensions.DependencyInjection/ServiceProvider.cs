@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// The default IServiceProvider.
     /// </summary>
-    internal class ServiceProvider : IServiceProvider, IDisposable
+    public class ServiceProvider : IServiceProvider, IDisposable
     {
         private readonly ServiceProvider _root;
         private readonly ServiceTable _table;
@@ -57,6 +57,13 @@ namespace Microsoft.Extensions.DependencyInjection
             return realizedService.Invoke(this);
         }
 
+        public string GetServiceExpression(Type serviceType, string providerExpression)
+        {
+            var callSite = GetServiceCallSite(serviceType, new HashSet<Type>());
+
+            return callSite.Build("this", providerExpression);
+        }
+
         private static Func<ServiceProvider, object> CreateServiceAccessor(Type serviceType, ServiceProvider serviceProvider)
         {
             var callSite = serviceProvider.GetServiceCallSite(serviceType, new HashSet<Type>());
@@ -77,11 +84,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     Task.Run(() =>
                     {
-                        var providerExpression = Expression.Parameter(typeof(ServiceProvider), "provider");
-
-                        var lambdaExpression = Expression.Lambda<Func<ServiceProvider, object>>(
-                            callSite.Build(providerExpression),
-                            providerExpression);
+                        var lambdaExpression = GetExpression(callSite);
 
                         table.RealizedServices[serviceType] = lambdaExpression.Compile();
                     });
@@ -89,6 +92,16 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 return callSite.Invoke(provider);
             };
+        }
+
+        private static Expression<Func<ServiceProvider, object>> GetExpression(IServiceCallSite callSite)
+        {
+            var providerExpression = Expression.Parameter(typeof(ServiceProvider), "provider");
+
+            var lambdaExpression = Expression.Lambda<Func<ServiceProvider, object>>(
+                callSite.Build(providerExpression),
+                providerExpression);
+            return lambdaExpression;
         }
 
         internal IServiceCallSite GetServiceCallSite(Type serviceType, ISet<Type> callSiteChain)
@@ -251,6 +264,11 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 return Expression.Constant(_serviceInstance, _serviceType);
             }
+
+            public string Build(string thisExpression, string providerExpression)
+            {
+                return $"Array.Empty<{_serviceType.FullName}>()";
+            }
         }
 
         private class TransientCallSite : IServiceCallSite
@@ -273,6 +291,11 @@ namespace Microsoft.Extensions.DependencyInjection
                     provider,
                     CaptureDisposableMethodInfo,
                     _service.Build(provider));
+            }
+
+            public string Build(string thisExpression, string providerExpression)
+            {
+                return $"{providerExpression}.CaptureDisposable({_service.Build(thisExpression, providerExpression)})";
             }
         }
 
@@ -305,6 +328,11 @@ namespace Microsoft.Extensions.DependencyInjection
                     keyExpression,
                     factoryExpression);
             }
+
+            public virtual string Build(string thisExpression, string providerExpression)
+            {
+                return $"{providerExpression}.GetOrAdd(typeof({_key.ServiceType.FullName}), () => {_serviceCallSite.Build(thisExpression, providerExpression)})";
+            }
         }
 
         private class SingletonCallSite : ScopedCallSite
@@ -321,6 +349,11 @@ namespace Microsoft.Extensions.DependencyInjection
             public override Expression Build(Expression provider)
             {
                 return base.Build(Expression.Field(provider, "_root"));
+            }
+
+            public override string Build(string thisExpression, string providerExpression)
+            {
+                return base.Build(thisExpression, $"{providerExpression}._root");
             }
         }
     }

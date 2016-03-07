@@ -26,6 +26,8 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
             get { return ServiceLifetime.Transient; }
         }
 
+        public Type ServiceType => _itemType;
+
         public IServiceCallSite CreateCallSite(ServiceProvider provider, ISet<Type> callSiteChain)
         {
             var list = new List<IServiceCallSite>();
@@ -67,6 +69,12 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
                         Expression.Convert(
                             callSite.Build(provider),
                             _itemType)));
+            }
+
+            public string Build(string thisExpression, string providerExpression)
+            {
+                // This can be made to work
+                throw new NotSupportedException();
             }
         }
     }

@@ -8,6 +8,8 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 {
     internal interface IService
     {
+        Type ServiceType { get; }
+
         IService Next { get; set; }
 
         ServiceLifetime Lifetime { get; }

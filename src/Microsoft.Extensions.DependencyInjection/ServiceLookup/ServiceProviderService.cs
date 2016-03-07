@@ -9,6 +9,8 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
 {
     internal class ServiceProviderService : IService, IServiceCallSite
     {
+        public Type ServiceType => typeof(IServiceProvider);
+
         public IService Next { get; set; }
 
         public ServiceLifetime Lifetime
@@ -29,6 +31,11 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
         public Expression Build(Expression provider)
         {
             return provider;
+        }
+
+        public string Build(string thisExpression, string providerExpression)
+        {
+            return providerExpression;
         }
     }
 }

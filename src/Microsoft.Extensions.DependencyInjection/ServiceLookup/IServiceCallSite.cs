@@ -13,5 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
         object Invoke(ServiceProvider provider);
 
         Expression Build(Expression provider);
+
+        string Build(string thisExpression, string providerExpression);
     }
 }

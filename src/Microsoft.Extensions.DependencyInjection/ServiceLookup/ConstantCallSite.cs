@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Linq.Expressions;
 
 namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
@@ -22,6 +23,11 @@ namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
         public Expression Build(Expression provider)
         {
             return Expression.Constant(_defaultValue);
+        }
+
+        public string Build(string thisExpression, string providerExpression)
+        {
+            throw new NotSupportedException();
         }
     }
 }
