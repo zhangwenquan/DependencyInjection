@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.ServiceLookup;
+using Microsoft.Extensions.Internal;
 
 namespace ConsoleApp1
 {
@@ -15,15 +16,13 @@ namespace ConsoleApp1
         public static void Main(string[] args)
         {
             var services = new ServiceCollection();
-            services.AddTransient<IFoo, Foo>();
-            services.AddScoped<IBar, Bar>();
-            services.AddSingleton<IBaz>(new Baz());
+            services.AddMvc();
 
             var code = services.GenerateCode("MyAppContainer");
             File.WriteAllText("MyAppContainer.cs", code);
 
-            var container = services.BuildServiceProvider(MyAppContainer.GetServices());
-            var foo = container.GetRequiredService<IFoo>();
+            // var container = services.BuildServiceProvider(MyAppContainer.GetServices());
+            // var foo = container.GetRequiredService<IFoo>();
         }
     }
 
@@ -46,7 +45,7 @@ namespace ConsoleApp1
                 {
                     if (item.ImplementationFactory != null ||
                         item.ImplementationInstance != null ||
-                        item.ServiceType.ContainsGenericParameters)
+                        item.ServiceType.IsGenericTypeDefinition)
                     {
                         _services[item.ServiceType] = null;
                     }
@@ -61,13 +60,7 @@ namespace ConsoleApp1
             private void GenerateServiceBody(StringBuilder sb, ServiceDescriptor descriptor)
             {
                 var serviceType = descriptor.ServiceType;
-                string method = GetMethodName(serviceType);
-                //sb.AppendLine($"    private static {serviceType} {method}({typeof(IServiceProvider)} serviceProvider)");
-                //sb.AppendLine("    {");
-                //sb.AppendLine($"        var sp = ({typeof(ServiceProvider)})serviceProvider;");
-                //sb.AppendLine($"        return {GenerateCreateInstance(descriptor)};");
-                //sb.AppendLine("    }");
-                //sb.AppendLine();
+                string method = GetClassName(serviceType);
                 var constructors = descriptor.ImplementationType.GetTypeInfo()
                                 .DeclaredConstructors
                                 .Where(constructor => constructor.IsPublic)
@@ -78,7 +71,7 @@ namespace ConsoleApp1
                 {
                     ctor = constructors[0];
                 }
-                else if(constructors.Length > 1)
+                else if (constructors.Length > 1)
                 {
                     ctor = constructors.OrderByDescending(c => c.GetParameters().Length).FirstOrDefault();
                 }
@@ -87,83 +80,63 @@ namespace ConsoleApp1
 
                 sb.AppendLine($"    private class {method} : {typeof(IService)}, {typeof(IServiceCallSite)}");
                 sb.AppendLine("    {");
+                sb.AppendLine($"        private {typeof(ConstructorInfo)} _ctor;");
                 foreach (var parameter in parameters)
                 {
                     sb.AppendLine($"        private {typeof(IServiceCallSite)} _{parameter.Name};");
                 }
-                sb.AppendLine($"        public {typeof(Type)} ServiceType => typeof({serviceType});");
+                sb.AppendLine($"        public {typeof(Type)} ServiceType => typeof({GetTypeName(serviceType)});");
                 sb.AppendLine($"        public {typeof(IService)} Next {{ get; set; }}");
                 sb.AppendLine($"        public {typeof(ServiceLifetime)} Lifetime => {typeof(ServiceLifetime)}.{descriptor.Lifetime};");
                 sb.AppendLine($"        public {typeof(IServiceCallSite)} CreateCallSite({typeof(ServiceProvider)} provider, {typeof(ISet<>).ToString().Replace("`1[T]", $"<{typeof(Type)}>")} callSiteChain)");
                 sb.AppendLine("        {");
+                if (parameters.Length == 0)
+                {
+                    sb.AppendLine($"            var types = {typeof(Type)}.EmptyTypes;");
+                }
+                else
+                {
+                    sb.AppendLine($"            var types = new {typeof(Type)}[{parameters.Length}];");
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        sb.AppendLine($"            types[{i}] = typeof({GetTypeName(parameters[i].ParameterType)});");
+                    }
+                }
+
+                sb.AppendLine($"            _ctor = {typeof(IntrospectionExtensions)}.GetTypeInfo(typeof({descriptor.ImplementationType})).GetConstructor(types);");
                 foreach (var parameter in parameters)
                 {
-                    sb.AppendLine($"            _{parameter.Name} = provider.GetServiceCallSite(typeof({parameter.ParameterType}), callSiteChain);");
+                    sb.AppendLine($"            _{parameter.Name} = provider.GetServiceCallSite(typeof({GetTypeName(parameter.ParameterType)}), callSiteChain);");
                 }
                 sb.AppendLine("            return this;");
                 sb.AppendLine("        }");
                 sb.AppendLine($"        public object Invoke({typeof(ServiceProvider)} provider)");
                 sb.AppendLine("        {");
-                sb.AppendLine($"            return {GenerateCreateInstance(ctor, descriptor)};");
+                sb.AppendLine($"{GenerateCreateInstance(ctor, descriptor)};");
                 sb.AppendLine("        }");
                 sb.AppendLine();
                 sb.AppendLine($"        public {typeof(Expression)} Build({typeof(Expression)} provider)");
                 sb.AppendLine("        {");
-                sb.AppendLine($"            return provider;");
+                sb.AppendLine($"{GenerateCreateInstanceExpression(ctor, descriptor)};");
                 sb.AppendLine("        }");
                 sb.AppendLine("    }");
                 sb.AppendLine();
-
-                /*
-                internal class FactoryService : IService, IServiceCallSite
-    {
-        private readonly ServiceDescriptor _descriptor;
-
-        public FactoryService(ServiceDescriptor descriptor)
-        {
-            _descriptor = descriptor;
-        }
-
-        public Type ServiceType => _descriptor.ServiceType;
-
-        public IService Next { get; set; }
-
-        public ServiceLifetime Lifetime
-        {
-            get { return _descriptor.Lifetime; }
-        }
-
-        public IServiceCallSite CreateCallSite(ServiceProvider provider, ISet<Type> callSiteChain)
-        {
-            return this;
-        }
-
-        public object Invoke(ServiceProvider provider)
-        {
-            return _descriptor.ImplementationFactory(provider);
-        }
-
-        public Expression Build(Expression provider)
-        {
-            Expression<Func<IServiceProvider, object>> factory =
-                serviceProvider => _descriptor.ImplementationFactory(serviceProvider);
-
-            return Expression.Invoke(factory, provider);
-        }
-    }
-                
-                */
             }
 
             private string GenerateCreateInstance(ConstructorInfo ctor, ServiceDescriptor descriptor)
             {
-                if (ctor == null)
+                if (ctor == null || ctor.GetParameters().Length == 0)
                 {
-                    return $"new {descriptor.ImplementationType}()";
+                    return $"            return new {descriptor.ImplementationType}()";
                 }
 
                 var sb = new StringBuilder();
-                sb.Append($"new {descriptor.ImplementationType}(");
+                foreach (var param in ctor.GetParameters())
+                {
+                    sb.AppendLine($"            var {param.Name} = ({GetTypeName(param.ParameterType)})_{param.Name}.Invoke(provider);");
+                }
+
+                sb.Append($"            return new {descriptor.ImplementationType}(");
                 bool first = true;
                 foreach (var param in ctor.GetParameters())
                 {
@@ -171,18 +144,45 @@ namespace ConsoleApp1
                     {
                         sb.Append(", ");
                     }
-                    sb.Append($"({param.ParameterType})_{param.Name}.Invoke(provider)");
+                    sb.Append(param.Name);
                     first = false;
                 }
                 sb.Append(")");
                 return sb.ToString();
             }
 
-            private string GetMethodName(Type serviceType)
+            private string GenerateCreateInstanceExpression(ConstructorInfo ctor, ServiceDescriptor descriptor)
+            {
+                if (ctor == null || ctor.GetParameters().Length == 0)
+                {
+                    return $"            return {typeof(Expression)}.New(typeof({descriptor.ImplementationType}))";
+                }
+
+                var sb = new StringBuilder();
+                foreach (var param in ctor.GetParameters())
+                {
+                    sb.AppendLine($"            var {param.Name} = _{param.Name}.Build(provider);");
+                }
+                sb.Append($"            return {typeof(Expression)}.New(_ctor");
+                foreach (var param in ctor.GetParameters())
+                {
+                    sb.Append(", ");
+                    sb.Append(param.Name);
+                }
+                sb.Append(")");
+                return sb.ToString();
+            }
+
+            private string GetTypeName(Type type)
+            {
+                return TypeNameHelper.GetTypeDisplayName(type);
+            }
+
+            private string GetClassName(Type serviceType)
             {
                 if (_services.ContainsKey(serviceType))
                 {
-                    return $"{serviceType.ToString().Replace('.', '_')}Service";
+                    return $"{serviceType.ToString().Replace('.', '_').Replace('`', '_').Replace('[', '_').Replace("]", "")}Service";
                 }
                 throw new NotSupportedException();
             }
@@ -197,7 +197,7 @@ namespace ConsoleApp1
                 foreach (var item in _services)
                 {
                     if (item.Value == null) continue;
-                    sb.AppendLine($"        yield return new {GetMethodName(item.Key)}();");
+                    sb.AppendLine($"        yield return new {GetClassName(item.Key)}();");
                 }
                 sb.AppendLine("    }");
                 sb.AppendLine();

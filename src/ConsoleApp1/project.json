@@ -11,6 +11,8 @@
   },
 
   "dependencies": {
+    "Microsoft.AspNetCore.Mvc": "1.0.0-*",
+    "Microsoft.Extensions.TypeNameHelper.Sources": { "version": "1.0.0-*", "type": "build" },
     "Microsoft.Extensions.DependencyInjection": "1.0.0-*"
   },
 
