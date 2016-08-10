@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 
-namespace Microsoft.Extensions.DependencyInjection.ServiceLookup
+namespace Microsoft.Extensions.DependencyInjection.Tests.ServiceLookup.Types
 {
     public class TypeWithNonOverlappedConstructors
     {
