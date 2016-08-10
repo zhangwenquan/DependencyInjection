@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.V2;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_Throws_WhenScopedIsInjectedIntoSingleton()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddSingleton<IFoo, Foo>();
             serviceCollection.AddScoped<IBar, Bar>();
             var serviceProvider = serviceCollection.BuildServiceProvider(validateScopes: true);
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_Throws_WhenScopedIsInjectedIntoSingletonThroughTransient()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddSingleton<IFoo, Foo>();
             serviceCollection.AddTransient<IBar, Bar2>();
             serviceCollection.AddScoped<IBaz, Baz>();
@@ -42,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_Throws_WhenScopedIsInjectedIntoSingletonThroughSingleton()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddSingleton<IFoo, Foo>();
             serviceCollection.AddSingleton<IBar, Bar2>();
             serviceCollection.AddScoped<IBaz, Baz>();
@@ -57,7 +58,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_Throws_WhenGetServiceForScopedServiceIsCalledOnRoot()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddScoped<IBar, Bar>();
             var serviceProvider = serviceCollection.BuildServiceProvider(validateScopes: true);
 
@@ -70,7 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_Throws_WhenGetServiceForScopedServiceIsCalledOnRootViaTransient()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddTransient<IFoo, Foo>();
             serviceCollection.AddScoped<IBar, Bar>();
             var serviceProvider = serviceCollection.BuildServiceProvider(validateScopes: true);
@@ -84,7 +85,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_DoesNotThrow_WhenScopeFactoryIsInjectedIntoSingleton()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddSingleton<IBoo, Boo>();
             var serviceProvider = serviceCollection.BuildServiceProvider(true);
 

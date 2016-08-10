@@ -12,21 +12,21 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 {
     internal class CallSiteExpressionBuilder : CallSiteVisitor<ParameterExpression, Expression>
     {
-        private static readonly MethodInfo CaptureDisposableMethodInfo = GetMethodInfo<Func<ServiceProvider, object, object>>((a, b) => a.CaptureDisposable(b));
+        private static readonly MethodInfo CaptureDisposableMethodInfo = GetMethodInfo<Func<ServiceProvider2, object, object>>((a, b) => a.CaptureDisposable(b));
         private static readonly MethodInfo TryGetValueMethodInfo = GetMethodInfo<Func<IDictionary<object, object>, object, object, bool>>((a, b, c) => a.TryGetValue(b, out c));
         private static readonly MethodInfo AddMethodInfo = GetMethodInfo<Action<IDictionary<object, object>, object, object>>((a, b, c) => a.Add(b, c));
         private static readonly MethodInfo MonitorEnterMethodInfo = GetMethodInfo<Action<object, bool>>((lockObj, lockTaken) => Monitor.Enter(lockObj, ref lockTaken));
         private static readonly MethodInfo MonitorExitMethodInfo = GetMethodInfo<Action<object>>(lockObj => Monitor.Exit(lockObj));
         private static readonly MethodInfo CallSiteRuntimeResolverResolve =
-            GetMethodInfo<Func<CallSiteRuntimeResolver, IServiceCallSite, ServiceProvider, object>>((r, c, p) => r.Resolve(c, p));
+            GetMethodInfo<Func<CallSiteRuntimeResolver, IServiceCallSite, ServiceProvider2, object>>((r, c, p) => r.Resolve(c, p));
 
-        private static readonly ParameterExpression ProviderParameter = Expression.Parameter(typeof(ServiceProvider));
+        private static readonly ParameterExpression ProviderParameter = Expression.Parameter(typeof(ServiceProvider2));
 
         private static readonly ParameterExpression ResolvedServices = Expression.Variable(typeof(IDictionary<object, object>),
             ProviderParameter.Name + "resolvedServices");
         private static readonly BinaryExpression ResolvedServicesVariableAssignment =
             Expression.Assign(ResolvedServices,
-                Expression.Property(ProviderParameter, nameof(ServiceProvider.ResolvedServices)));
+                Expression.Property(ProviderParameter, nameof(ServiceProvider2.ResolvedServices)));
 
         private static readonly ParameterExpression CaptureDisposableParameter = Expression.Parameter(typeof(object));
         private static readonly LambdaExpression CaptureDisposable = Expression.Lambda(
@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
             _runtimeResolver = runtimeResolver;
         }
 
-        public Func<ServiceProvider, object> Build(IServiceCallSite callSite)
+        public Func<ServiceProvider2, object> Build(IServiceCallSite callSite)
         {
             if (callSite is SingletonCallSite)
             {
@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
             return BuildExpression(callSite).Compile();
         }
 
-        private Expression<Func<ServiceProvider, object>> BuildExpression(IServiceCallSite callSite)
+        private Expression<Func<ServiceProvider2, object>> BuildExpression(IServiceCallSite callSite)
         {
             var serviceExpression = VisitCallSite(callSite, ProviderParameter);
 
@@ -73,7 +73,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
                 ? new[] { ResolvedServices }
                 : Enumerable.Empty<ParameterExpression>();
 
-            return Expression.Lambda<Func<ServiceProvider, object>>(
+            return Expression.Lambda<Func<ServiceProvider2, object>>(
                 Expression.Block(variables, body),
                 ProviderParameter);
         }

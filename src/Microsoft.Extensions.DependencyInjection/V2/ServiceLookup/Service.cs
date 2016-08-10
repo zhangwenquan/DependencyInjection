@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
             get { return _descriptor.Lifetime; }
         }
 
-        public IServiceCallSite CreateCallSite(ServiceProvider provider, ISet<Type> callSiteChain)
+        public IServiceCallSite CreateCallSite(ServiceProvider2 provider, ISet<Type> callSiteChain)
         {
             var constructors = _descriptor.ImplementationType.GetTypeInfo()
                 .DeclaredConstructors
@@ -120,7 +121,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
         public Type ServiceType => _descriptor.ServiceType;
 
         private IServiceCallSite[] PopulateCallSites(
-            ServiceProvider provider,
+            ServiceProvider2 provider,
             ISet<Type> callSiteChain,
             ParameterInfo[] parameters,
             bool throwIfCallSiteNotFound)

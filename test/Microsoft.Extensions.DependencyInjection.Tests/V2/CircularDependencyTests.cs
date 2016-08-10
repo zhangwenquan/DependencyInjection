@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.Tests.Fakes;
 using Microsoft.Extensions.DependencyInjection.V2;
 using Xunit;
@@ -13,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void SelfCircularDependency()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddTransient<SelfCircularDependency>()
                 .BuildServiceProvider();
 
@@ -28,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void SelfCircularDependencyGenericDirect()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddTransient<SelfCircularDependencyGeneric<string>>()
                 .BuildServiceProvider();
 
@@ -43,7 +44,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void SelfCircularDependencyGenericIndirect()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddTransient<SelfCircularDependencyGeneric<int>>()
                 .AddTransient<SelfCircularDependencyGeneric<string>>()
                 .BuildServiceProvider();
@@ -59,7 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void NoCircularDependencyGeneric()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddSingleton(new SelfCircularDependencyGeneric<string>())
                 .AddTransient<SelfCircularDependencyGeneric<int>>()
                 .BuildServiceProvider();
@@ -73,7 +74,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void SelfCircularDependencyWithInterface()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddTransient<ISelfCircularDependencyWithInterface, SelfCircularDependencyWithInterface>()
                 .AddTransient<SelfCircularDependencyWithInterface>()
                 .BuildServiceProvider();
@@ -89,7 +90,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void DirectCircularDependency()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddSingleton<DirectCircularDependencyA>()
                 .AddSingleton<DirectCircularDependencyB>()
                 .BuildServiceProvider();
@@ -105,7 +106,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void IndirectCircularDependency()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddSingleton<IndirectCircularDependencyA>()
                 .AddTransient<IndirectCircularDependencyB>()
                 .AddTransient<IndirectCircularDependencyC>()
@@ -122,7 +123,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void NoCircularDependencySameTypeMultipleTimes()
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceProvider = new ServiceCollection2()
                 .AddTransient<NoCircularDependencySameTypeMultipleTimesA>()
                 .AddTransient<NoCircularDependencySameTypeMultipleTimesB>()
                 .AddTransient<NoCircularDependencySameTypeMultipleTimesC>()

@@ -5,12 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection.Abstractions;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Abstractions.V2
 {
-    public static class ServiceCollectionEnumerableExtensions
+    public static class ServiceCollectionEnumerableExtensions2
     {
         public static IServiceCollection2 AddEnumerable<TService>(this IServiceCollection2 services)
             where TService : class

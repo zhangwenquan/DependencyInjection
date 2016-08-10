@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Testing;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.V2;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetService_Returns_CorrectService()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddTransient<IFoo, Foo1>();
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -182,7 +183,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void GetServices_WithBuildServiceProvider_Returns_EmptyList_WhenNoServicesAvailable()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddSingleton<IEnumerable<IFoo>>(new List<IFoo>());
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -198,7 +199,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void NonGeneric_GetServices_WithBuildServiceProvider_Returns_EmptyList_WhenNoServicesAvailable()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddSingleton<IEnumerable<IFoo>>(new List<IFoo>());
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -212,7 +213,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
 
         private static IServiceProvider CreateTestServiceProvider(int count)
         {
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
 
             if (count > 0)
             {

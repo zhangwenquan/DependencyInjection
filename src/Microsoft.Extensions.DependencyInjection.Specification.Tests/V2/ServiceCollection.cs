@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.Specification.Tests.V2
 {

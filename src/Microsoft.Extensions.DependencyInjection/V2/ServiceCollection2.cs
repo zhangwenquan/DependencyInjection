@@ -5,13 +5,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.V2
 {
     /// <summary>
     /// Default implementation of <see cref="IServiceCollection2"/>.
     /// </summary>
-    public class ServiceCollection : IServiceCollection2
+    public class ServiceCollection2 : IServiceCollection2
     {
         private readonly List<ServiceDescriptor2> _descriptors = new List<ServiceDescriptor2>();
 

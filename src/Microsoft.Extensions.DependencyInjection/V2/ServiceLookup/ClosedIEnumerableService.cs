@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 
         public Type ServiceType => _itemType;
 
-        public IServiceCallSite CreateCallSite(ServiceProvider provider, ISet<Type> callSiteChain)
+        public IServiceCallSite CreateCallSite(ServiceProvider2 provider, ISet<Type> callSiteChain)
         {
             if (_services.Count == 0)
             {

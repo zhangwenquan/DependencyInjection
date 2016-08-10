@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Testing;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.V2.ServiceLookup;
 using Xunit;
 

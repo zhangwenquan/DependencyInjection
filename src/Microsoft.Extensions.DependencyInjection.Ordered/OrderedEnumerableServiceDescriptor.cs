@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.Ordered
 {

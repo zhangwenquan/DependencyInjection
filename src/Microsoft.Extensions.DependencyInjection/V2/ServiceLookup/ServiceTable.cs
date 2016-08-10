@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 {
@@ -14,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 
         private readonly Dictionary<Type, ServiceEntry> _services;
         private readonly Dictionary<Type, List<IGenericService>> _genericServices;
-        private readonly ConcurrentDictionary<Type, Func<ServiceProvider, object>> _realizedServices = new ConcurrentDictionary<Type, Func<ServiceProvider, object>>();
+        private readonly ConcurrentDictionary<Type, Func<ServiceProvider2, object>> _realizedServices = new ConcurrentDictionary<Type, Func<ServiceProvider2, object>>();
 
         public ServiceTable(IEnumerable<ServiceDescriptor2> descriptors)
         {
@@ -124,7 +125,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
             return service != null;
         }
 
-        public ConcurrentDictionary<Type, Func<ServiceProvider, object>> RealizedServices
+        public ConcurrentDictionary<Type, Func<ServiceProvider2, object>> RealizedServices
         {
             get { return _realizedServices; }
         }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.V2.Internal;
 using Microsoft.Extensions.DependencyInjection.V2.ServiceLookup;
 
@@ -14,22 +15,22 @@ namespace Microsoft.Extensions.DependencyInjection.V2
     /// <summary>
     /// The default IServiceProvider.
     /// </summary>
-    internal class ServiceProvider : IServiceProvider, IDisposable
+    internal class ServiceProvider2 : IServiceProvider, IDisposable
     {
         private readonly CallSiteValidator _callSiteValidator;
         private readonly ServiceTable _table;
         private bool _disposeCalled;
         private List<IDisposable> _transientDisposables;
 
-        internal ServiceProvider Root { get; }
+        internal ServiceProvider2 Root { get; }
         internal Dictionary<object, object> ResolvedServices { get; } = new Dictionary<object, object>();
 
-        private static readonly Func<Type, ServiceProvider, Func<ServiceProvider, object>> _createServiceAccessor = CreateServiceAccessor;
+        private static readonly Func<Type, ServiceProvider2, Func<ServiceProvider2, object>> _createServiceAccessor = CreateServiceAccessor;
 
         // CallSiteRuntimeResolver is stateless so can be shared between all instances
         private static readonly CallSiteRuntimeResolver _callSiteRuntimeResolver = new CallSiteRuntimeResolver();
 
-        public ServiceProvider(IEnumerable<ServiceDescriptor2> serviceDescriptors, bool validateScopes)
+        public ServiceProvider2(IEnumerable<ServiceDescriptor2> serviceDescriptors, bool validateScopes)
         {
             Root = this;
 
@@ -45,7 +46,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2
         }
 
         // This constructor is called exclusively to create a child scope from the parent
-        internal ServiceProvider(ServiceProvider parent)
+        internal ServiceProvider2(ServiceProvider2 parent)
         {
             Root = parent.Root;
             _table = parent._table;
@@ -66,7 +67,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2
             return realizedService.Invoke(this);
         }
 
-        private static Func<ServiceProvider, object> CreateServiceAccessor(Type serviceType, ServiceProvider serviceProvider)
+        private static Func<ServiceProvider2, object> CreateServiceAccessor(Type serviceType, ServiceProvider2 serviceProvider)
         {
             var callSite = serviceProvider.GetServiceCallSite(serviceType, new HashSet<Type>());
             if (callSite != null)
@@ -78,7 +79,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2
             return _ => null;
         }
 
-        internal static Func<ServiceProvider, object> RealizeService(ServiceTable table, Type serviceType, IServiceCallSite callSite)
+        internal static Func<ServiceProvider2, object> RealizeService(ServiceTable table, Type serviceType, IServiceCallSite callSite)
         {
             var callCount = 0;
             return provider =>

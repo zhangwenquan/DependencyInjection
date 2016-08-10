@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Abstractions.V2
 {
     [DebuggerDisplay("Lifetime = {Lifetime}, ServiceType = {ServiceType}, ImplementationFactory = {ImplementationFactory}")]
     public class FactoryServiceDescriptor : ServiceDescriptor2

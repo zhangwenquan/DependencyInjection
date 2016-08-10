@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.ServiceLookup;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Microsoft.Extensions.DependencyInjection.V2;
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
                 "Ensure the type is concrete and services are registered for all parameters of a public constructor.";
             var descriptor = ServiceDescriptor2.Transient(type, type);
             var service = new Service(descriptor);
-            var serviceProvider = new ServiceProvider(new[] { descriptor }, validateScopes: true);
+            var serviceProvider = new ServiceProvider2(new[] { descriptor }, validateScopes: true);
 
             // Act and Assert
             var ex = Assert.Throws<InvalidOperationException>(() => service.CreateCallSite(serviceProvider, new HashSet<Type>()));
@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             // Arrange
             var descriptor = ServiceDescriptor2.Transient(type, type);
             var service = new Service(descriptor);
-            var serviceProvider = new ServiceProvider(new[] { descriptor }, validateScopes: true);
+            var serviceProvider = new ServiceProvider2(new[] { descriptor }, validateScopes: true);
 
             // Act
             var callSite = service.CreateCallSite(serviceProvider, new HashSet<Type>());
@@ -103,7 +103,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             var type = typeof(TypeWithParameterizedAndNullaryConstructor);
             var descriptor = ServiceDescriptor2.Transient(type, type);
             var service = new Service(descriptor);
-            var serviceProvider = new ServiceProvider(new[] { descriptor }, validateScopes: true);
+            var serviceProvider = new ServiceProvider2(new[] { descriptor }, validateScopes: true);
 
             // Act
             var callSite = service.CreateCallSite(serviceProvider, new HashSet<Type>());
@@ -113,7 +113,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         }
 
         public static TheoryData CreateCallSite_PicksConstructorWithTheMostNumberOfResolvedParametersData =>
-            new TheoryData<Type, ServiceProvider, Type[]>
+            new TheoryData<Type, ServiceProvider2, Type[]>
             {
                 {
                     typeof(TypeWithSupersetConstructors),
@@ -198,7 +198,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
 
 
             // Act
-            var callSite = service.CreateCallSite((ServiceProvider)serviceProvider, new HashSet<Type>());
+            var callSite = service.CreateCallSite((ServiceProvider2)serviceProvider, new HashSet<Type>());
 
             // Assert
             var constructorCallSite = Assert.IsType<ConstructorCallSite>(callSite);
@@ -206,7 +206,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         }
 
         public static TheoryData CreateCallSite_ConsidersConstructorsWithDefaultValuesData =>
-            new TheoryData<ServiceProvider, Type[]>
+            new TheoryData<ServiceProvider2, Type[]>
             {
                 {
                     GetServiceProvider(
@@ -241,7 +241,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             var service = new Service(descriptor);
 
             // Act
-            var callSite = service.CreateCallSite((ServiceProvider)serviceProvider, new HashSet<Type>());
+            var callSite = service.CreateCallSite((ServiceProvider2)serviceProvider, new HashSet<Type>());
 
             // Assert
             var constructorCallSite = Assert.IsType<ConstructorCallSite>(callSite);
@@ -286,7 +286,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         }
 
         public static TheoryData CreateCallSite_ThrowsIfMultipleNonOverlappingConstructorsCanBeResolvedData =>
-            new TheoryData<Type, ServiceProvider, Type[][]>
+            new TheoryData<Type, ServiceProvider2, Type[][]>
             {
                 {
                     typeof(TypeWithDefaultConstructorParameters),
@@ -359,7 +359,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
 
             // Act and Assert
             var ex = Assert.Throws<InvalidOperationException>(
-                () => service.CreateCallSite((ServiceProvider)serviceProvider, new HashSet<Type>()));
+                () => service.CreateCallSite((ServiceProvider2)serviceProvider, new HashSet<Type>()));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -383,15 +383,15 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             Assert.StartsWith(expectedMessage, ex.Message);
         }
 
-        private static ServiceProvider GetServiceProvider(params ServiceDescriptor2[] descriptors)
+        private static ServiceProvider2 GetServiceProvider(params ServiceDescriptor2[] descriptors)
         {
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             foreach (var descriptor in descriptors)
             {
                 collection.Add(descriptor);
             }
 
-            return (ServiceProvider)collection.BuildServiceProvider();
+            return (ServiceProvider2)collection.BuildServiceProvider();
         }
 
         private static IEnumerable<Type> GetParameters(ConstructorCallSite constructorCallSite) =>

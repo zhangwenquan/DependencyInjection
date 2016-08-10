@@ -3,7 +3,7 @@
 
 using System;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.Ordered
 {

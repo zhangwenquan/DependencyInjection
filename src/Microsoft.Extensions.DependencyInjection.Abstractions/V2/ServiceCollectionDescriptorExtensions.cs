@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection.Abstractions;
 
-namespace Microsoft.Extensions.DependencyInjection.Extensions
+namespace Microsoft.Extensions.DependencyInjection.Abstractions.V2
 {
     public static class ServiceCollectionDescriptorExtensions
     {

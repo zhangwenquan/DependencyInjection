@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 {
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 
         public Type ServiceType => Descriptor.ServiceType;
 
-        public IServiceCallSite CreateCallSite(ServiceProvider provider, ISet<Type> callSiteChain)
+        public IServiceCallSite CreateCallSite(ServiceProvider2 provider, ISet<Type> callSiteChain)
         {
             return this;
         }

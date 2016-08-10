@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.V2.ServiceLookup
 {

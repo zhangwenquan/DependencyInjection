@@ -2,10 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 
 namespace Microsoft.Extensions.DependencyInjection.V2
 {
-    public static class ServiceCollectionContainerBuilderExtensions
+    public static class ServiceCollectionContainerBuilderExtensions2
     {
         /// <summary>
         /// Creates an <see cref="IServiceProvider"/> containing services from the provided <see cref="IServiceCollection2"/>.
@@ -29,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection.V2
         /// <returns>The<see cref="IServiceProvider"/>.</returns>
         public static IServiceProvider BuildServiceProvider(this IServiceCollection2 services, bool validateScopes)
         {
-            return new ServiceProvider(services, validateScopes);
+            return new ServiceProvider2(services, validateScopes);
         }
     }
 }

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Abstractions.V2
 {
     public class EnumerableServiceDescriptor : ServiceDescriptor2
     {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.Ordered;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Xunit;

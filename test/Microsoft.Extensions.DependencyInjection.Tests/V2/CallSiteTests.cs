@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Microsoft.Extensions.DependencyInjection.V2;
 using Microsoft.Extensions.DependencyInjection.V2.ServiceLookup;
@@ -17,12 +18,12 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void BuiltExpressionCanResolveNestedScopedService()
         {
-            var descriptors = new ServiceCollection();
+            var descriptors = new ServiceCollection2();
             descriptors.AddScoped<ServiceA>();
             descriptors.AddScoped<ServiceB>();
             descriptors.AddScoped<ServiceC>();
 
-            var provider = new ServiceProvider(descriptors, validateScopes: true);
+            var provider = new ServiceProvider2(descriptors, validateScopes: true);
             var callSite = provider.GetServiceCallSite(typeof(ServiceC), new HashSet<Type>());
             var compiledCallSite = CompileCallSite(callSite);
 
@@ -35,12 +36,12 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void BuiltExpressionRethrowsOriginalExceptionFromConstructor()
         {
-            var descriptors = new ServiceCollection();
+            var descriptors = new ServiceCollection2();
             descriptors.AddTransient<ClassWithThrowingEmptyCtor>();
             descriptors.AddTransient<ClassWithThrowingCtor>();
             descriptors.AddTransient<IFakeService, FakeService>();
 
-            var provider = new ServiceProvider(descriptors, validateScopes: true);
+            var provider = new ServiceProvider2(descriptors, validateScopes: true);
 
             var callSite1 = provider.GetServiceCallSite(typeof(ClassWithThrowingEmptyCtor), new HashSet<Type>());
             var compiledCallSite1 = CompileCallSite(callSite1);
@@ -79,12 +80,12 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             public ServiceB ServiceB { get; set; }
         }
 
-        private static object Invoke(IServiceCallSite callSite, ServiceProvider provider)
+        private static object Invoke(IServiceCallSite callSite, ServiceProvider2 provider)
         {
             return CallSiteRuntimeResolver.Resolve(callSite, provider);
         }
 
-        private static Func<ServiceProvider, object> CompileCallSite(IServiceCallSite callSite)
+        private static Func<ServiceProvider2, object> CompileCallSite(IServiceCallSite callSite)
         {
             return new CallSiteExpressionBuilder(CallSiteRuntimeResolver).Build(callSite);
         }

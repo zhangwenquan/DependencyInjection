@@ -3,12 +3,12 @@
 
 using System;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection.Abstractions.V2
 {
     /// <summary>
     /// Extension methods for adding services to an <see cref="IServiceCollection2" />.
     /// </summary>
-    public static class ServiceCollectionServiceExtensions
+    public static class ServiceCollectionServiceExtensions2
     {
         /// <summary>
         /// Adds a transient service of the type specified in <paramref name="serviceType"/> with an

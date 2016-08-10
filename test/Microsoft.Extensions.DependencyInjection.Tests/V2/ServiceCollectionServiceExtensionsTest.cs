@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Testing;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Microsoft.Extensions.DependencyInjection.V2;
 using Xunit;
@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
                                                             ServiceLifetime lifeCycle)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
 
             // Act
             addTypeAction(collection);
@@ -96,7 +96,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             ServiceLifetime lifeCycle)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
 
             // Act
             addAction(collection);
@@ -125,7 +125,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void AddSingleton_AddsWithSingletonLifecycle(Action<IServiceCollection2> addAction)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
 
             // Act
             addAction(collection);
@@ -144,7 +144,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void TryAddNoOpFailsIfExists(Action<IServiceCollection2> addAction)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             addAction(collection);
             var d = ServiceDescriptor2.Transient<IFakeService, FakeService>();
 
@@ -195,7 +195,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             ServiceLifetime expectedLifetime)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
 
             // Act
             addAction(collection);
@@ -218,7 +218,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             ServiceLifetime expectedLifetime)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             collection.Add(ServiceDescriptor2.Transient(expectedServiceType, expectedServiceType));
 
             // Act
@@ -237,7 +237,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void TryAddIfMissingActuallyAdds()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             var d = ServiceDescriptor2.Transient<IFakeService, FakeService>();
 
             // Act
@@ -283,7 +283,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             ServiceLifetime expectedLifetime)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
 
             // Act
             collection.TryAddEnumerable(descriptor);
@@ -308,7 +308,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             ServiceLifetime expectedLifetime)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             collection.TryAddEnumerable(descriptor);
 
             // Act
@@ -353,7 +353,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             Type implementationType)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
 
             // Act & Assert
             ExceptionAssert.ThrowsArgument(
@@ -366,7 +366,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void AddSequence_AddsServicesToCollection()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             var descriptor1 = ServiceDescriptor2.Transient<IFakeService, FakeService>();
             var descriptor2 = ServiceDescriptor2.Transient<IFakeOuterService, FakeOuterService>();
             var descriptors = new[] { descriptor1, descriptor2 };
@@ -382,7 +382,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void Replace_AddsServiceIfServiceTypeIsNotRegistered()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             var descriptor1 = ServiceDescriptor2.Transient<IFakeService, FakeService>();
             var descriptor2 = ServiceDescriptor2.Transient<IFakeOuterService, FakeOuterService>();
             collection.Add(descriptor1);
@@ -398,7 +398,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void Replace_ReplacesFirstServiceWithMatchingServiceType()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             var descriptor1 = ServiceDescriptor2.Transient<IFakeService, FakeService>();
             collection.Add(descriptor1);
             var descriptor2 = ServiceDescriptor2.Singleton<IFakeService, FakeService>();
@@ -414,7 +414,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void Add_ThrowsWhenAddingMultipleWithSameType()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             var descriptor1 = ServiceDescriptor2.Transient<IFakeService, FakeService>();
             collection.Add(descriptor1);
             var descriptor2 = ServiceDescriptor2.Singleton<IFakeService, FakeService>();
@@ -461,7 +461,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void AddEnumerable_SupportsAllServiceKinds(Action<IServiceCollection2> addServices)
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             addServices(collection);
             var provider = collection.BuildServiceProvider();
 

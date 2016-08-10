@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Abstractions.V2;
 using Microsoft.Extensions.DependencyInjection.Specification.Fakes;
 using Microsoft.Extensions.DependencyInjection.Tests.Fakes;
 using Microsoft.Extensions.DependencyInjection.V2;
@@ -19,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         [Fact]
         public void RethrowOriginalExceptionFromConstructor()
         {
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddTransient<ClassWithThrowingEmptyCtor>();
             serviceCollection.AddTransient<ClassWithThrowingCtor>();
             serviceCollection.AddTransient<IFakeService, FakeService>();
@@ -39,7 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
             // Arrange
             var expectedMessage = $"A suitable constructor for type '{typeof(ClassWithPrivateCtor).FullName}' could not be located. "
                 + "Ensure the type is concrete and services are registered for all parameters of a public constructor.";
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddTransient<ClassWithPrivateCtor>();
             serviceCollection.AddTransient<ClassDependsOnPrivateConstructorClass>();
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -53,7 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void AttemptingToResolveNonexistentServiceIndirectlyThrows()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             collection.AddTransient<DependOnNonexistentService>();
             var provider = CreateServiceProvider(collection);
 
@@ -67,7 +68,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void AttemptingToIEnumerableResolveNonexistentServiceIndirectlyThrows()
         {
             // Arrange
-            var collection = new ServiceCollection();
+            var collection = new ServiceCollection2();
             collection.AddEnumerable<DependOnNonexistentService, DependOnNonexistentService>();
             var provider = CreateServiceProvider(collection);
 
@@ -92,7 +93,7 @@ namespace Microsoft.Extensions.DependencyInjection.Tests.V2
         public void CreatingServiceProviderWithUnresolvableTypesThrows(Type serviceType, Type implementationType)
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new ServiceCollection2();
             serviceCollection.AddTransient(serviceType, implementationType);
 
             // Act and Assert
