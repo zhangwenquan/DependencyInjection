@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionEnumerableExtensions
     {
-        public static IServiceCollection AddEnumerable<TService>(this IServiceCollection services)
+        public static IServiceCollection2 AddEnumerable<TService>(this IServiceCollection2 services)
             where TService : class
         {
             if (services == null)
@@ -23,8 +23,8 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddEnumerable(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddEnumerable(
+            this IServiceCollection2 services,
             Type serviceType)
         {
             if (services == null)
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddEnumerable<TService, TImplementation>(this IServiceCollection services)
+        public static IServiceCollection2 AddEnumerable<TService, TImplementation>(this IServiceCollection2 services)
             where TService : class
             where TImplementation : class, TService
         {
@@ -44,11 +44,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            return AddEnumerable(services, (ServiceDescriptor) ServiceDescriptor.Transient(typeof(TService), typeof(TImplementation)));
+            return AddEnumerable(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(typeof(TService), typeof(TImplementation)));
         }
 
-        public static IServiceCollection AddEnumerable<TService>(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddEnumerable<TService>(
+            this IServiceCollection2 services,
             TService implementationInstance)
             where TService : class
         {
@@ -62,11 +62,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(implementationInstance));
             }
 
-            return AddEnumerable(services, (ServiceDescriptor) ServiceDescriptor.Singleton(typeof(TService), implementationInstance));
+            return AddEnumerable(services, (ServiceDescriptor2) ServiceDescriptor2.Singleton(typeof(TService), implementationInstance));
         }
 
-        public static IServiceCollection AddEnumerable(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddEnumerable(
+            this IServiceCollection2 services,
             Type serviceType,
             object implementationInstance)
         {
@@ -85,11 +85,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(implementationInstance));
             }
 
-            return AddEnumerable(services, (ServiceDescriptor) ServiceDescriptor.Singleton(serviceType, implementationInstance));
+            return AddEnumerable(services, (ServiceDescriptor2) ServiceDescriptor2.Singleton(serviceType, implementationInstance));
         }
 
-        public static IServiceCollection AddEnumerable(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddEnumerable(
+            this IServiceCollection2 services,
             Type serviceType,
             Type implementationType)
         {
@@ -108,11 +108,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(implementationType));
             }
 
-            return AddEnumerable(services, (ServiceDescriptor) ServiceDescriptor.Transient(serviceType, implementationType));
+            return AddEnumerable(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(serviceType, implementationType));
         }
 
-        public static IServiceCollection AddEnumerable(
-           this IServiceCollection services,
+        public static IServiceCollection2 AddEnumerable(
+           this IServiceCollection2 services,
            Type serviceType,
            Func<IServiceProvider, object> implementationFactory)
         {
@@ -131,11 +131,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            return AddEnumerable(services, (ServiceDescriptor) ServiceDescriptor.Transient(serviceType, implementationFactory));
+            return AddEnumerable(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(serviceType, implementationFactory));
         }
 
-        public static IServiceCollection AddEnumerable<TService, TImplementation>(
-           this IServiceCollection services,
+        public static IServiceCollection2 AddEnumerable<TService, TImplementation>(
+           this IServiceCollection2 services,
            Func<IServiceProvider, TImplementation> implementationFactory)
            where TService : class
            where TImplementation : class, TService
@@ -150,12 +150,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            return AddEnumerable(services, (ServiceDescriptor) ServiceDescriptor.Transient(typeof(TService), implementationFactory));
+            return AddEnumerable(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(typeof(TService), implementationFactory));
         }
 
-        public static IServiceCollection AddEnumerable(
-            this IServiceCollection collection,
-            ServiceDescriptor descriptor)
+        public static IServiceCollection2 AddEnumerable(
+            this IServiceCollection2 collection,
+            ServiceDescriptor2 descriptor)
         {
             if (collection == null)
             {
@@ -173,7 +173,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         private static EnumerableServiceDescriptor GetEnumerableDescriptor(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type serviceType)
         {
             var descriptor = (EnumerableServiceDescriptor)
@@ -189,25 +189,25 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds a <see cref="ServiceDescriptor"/> if an existing descriptor with the same
-        /// <see cref="ServiceDescriptor.ServiceType"/> and an implementation that does not already exist
+        /// Adds a <see cref="ServiceDescriptor2"/> if an existing descriptor with the same
+        /// <see cref="ServiceDescriptor2.ServiceType"/> and an implementation that does not already exist
         /// in <paramref name="services."/>.
         /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptor">The <see cref="ServiceDescriptor"/>.</param>
+        /// <param name="services">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptor">The <see cref="ServiceDescriptor2"/>.</param>
         /// <remarks>
-        /// Use <see cref="TryAddEnumerable(IServiceCollection, ServiceDescriptor)"/> when registing a service implementation of a
+        /// Use <see cref="TryAddEnumerable(IServiceCollection2, ServiceDescriptor2)"/> when registing a service implementation of a
         /// service type that
         /// supports multiple registrations of the same service type. Using
-        /// <see cref="ServiceCollectionDescriptorExtensions.Add(IServiceCollection, ServiceDescriptor)"/> is not idempotent and can add
+        /// <see cref="ServiceCollectionDescriptorExtensions.Add(IServiceCollection2, ServiceDescriptor2)"/> is not idempotent and can add
         /// duplicate
-        /// <see cref="ServiceDescriptor"/> instances if called twice. Using
-        /// <see cref="TryAddEnumerable(IServiceCollection, ServiceDescriptor)"/> will prevent registration
+        /// <see cref="ServiceDescriptor2"/> instances if called twice. Using
+        /// <see cref="TryAddEnumerable(IServiceCollection2, ServiceDescriptor2)"/> will prevent registration
         /// of multiple implementation types.
         /// </remarks>
         public static void TryAddEnumerable(
-            this IServiceCollection services,
-            ServiceDescriptor descriptor)
+            this IServiceCollection2 services,
+            ServiceDescriptor2 descriptor)
         {
             if (services == null)
             {
@@ -241,25 +241,25 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds the specified <see cref="ServiceDescriptor"/>s if an existing descriptor with the same
-        /// <see cref="ServiceDescriptor.ServiceType"/> and an implementation that does not already exist
+        /// Adds the specified <see cref="ServiceDescriptor2"/>s if an existing descriptor with the same
+        /// <see cref="ServiceDescriptor2.ServiceType"/> and an implementation that does not already exist
         /// in <paramref name="services."/>.
         /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptors">The <see cref="ServiceDescriptor"/>s.</param>
+        /// <param name="services">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptors">The <see cref="ServiceDescriptor2"/>s.</param>
         /// <remarks>
-        /// Use <see cref="TryAddEnumerable(IServiceCollection, ServiceDescriptor)"/> when registing a service
+        /// Use <see cref="TryAddEnumerable(IServiceCollection2, ServiceDescriptor2)"/> when registing a service
         /// implementation of a service type that
         /// supports multiple registrations of the same service type. Using
-        /// <see cref="ServiceCollectionDescriptorExtensions.Add(IServiceCollection, ServiceDescriptor)"/> is not idempotent and can add
+        /// <see cref="ServiceCollectionDescriptorExtensions.Add(IServiceCollection2, ServiceDescriptor2)"/> is not idempotent and can add
         /// duplicate
-        /// <see cref="ServiceDescriptor"/> instances if called twice. Using
-        /// <see cref="TryAddEnumerable(IServiceCollection, ServiceDescriptor)"/> will prevent registration
+        /// <see cref="ServiceDescriptor2"/> instances if called twice. Using
+        /// <see cref="TryAddEnumerable(IServiceCollection2, ServiceDescriptor2)"/> will prevent registration
         /// of multiple implementation types.
         /// </remarks>
         public static void TryAddEnumerable(
-            this IServiceCollection services,
-            IEnumerable<ServiceDescriptor> descriptors)
+            this IServiceCollection2 services,
+            IEnumerable<ServiceDescriptor2> descriptors)
         {
             if (services == null)
             {
@@ -277,7 +277,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
 
-        internal static Type GetImplementationType(this ServiceDescriptor descriptor)
+        internal static Type GetImplementationType(this ServiceDescriptor2 descriptor)
         {
             var factoryServiceDescriptor = descriptor as FactoryServiceDescriptor;
             if (factoryServiceDescriptor != null)

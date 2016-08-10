@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace Microsoft.Extensions.DependencyInjection
 {
     [DebuggerDisplay("Lifetime = {Lifetime}, ServiceType = {ServiceType}, ImplementationFactory = {ImplementationFactory}")]
-    public class FactoryServiceDescriptor : ServiceDescriptor
+    public class FactoryServiceDescriptor : ServiceDescriptor2
     {
         /// <summary>
         /// Initializes a new instance of <see cref="FactoryServiceDescriptor"/> with the specified <paramref name="factory"/>.

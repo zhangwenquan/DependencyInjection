@@ -13,12 +13,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         /// <summary>
         /// Adds the specified <paramref name="descriptor"/> to the <paramref name="collection"/>.
         /// </summary>
-        /// <param name="collection">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptor">The <see cref="ServiceDescriptor"/>.</param>
-        /// <returns>A reference to the current instance of <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection Add(
-            this IServiceCollection collection,
-            ServiceDescriptor descriptor)
+        /// <param name="collection">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptor">The <see cref="ServiceDescriptor2"/>.</param>
+        /// <returns>A reference to the current instance of <see cref="IServiceCollection2"/>.</returns>
+        public static IServiceCollection2 Add(
+            this IServiceCollection2 collection,
+            ServiceDescriptor2 descriptor)
         {
             if (collection == null)
             {
@@ -34,14 +34,14 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         }
 
         /// <summary>
-        /// Adds a sequence of <see cref="ServiceDescriptor"/> to the <paramref name="collection"/>.
+        /// Adds a sequence of <see cref="ServiceDescriptor2"/> to the <paramref name="collection"/>.
         /// </summary>
-        /// <param name="collection">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptors">The <see cref="IEnumerable{T}"/> of <see cref="ServiceDescriptor"/>s to add.</param>
-        /// <returns>A reference to the current instance of <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection Add(
-            this IServiceCollection collection,
-            IEnumerable<ServiceDescriptor> descriptors)
+        /// <param name="collection">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptors">The <see cref="IEnumerable{T}"/> of <see cref="ServiceDescriptor2"/>s to add.</param>
+        /// <returns>A reference to the current instance of <see cref="IServiceCollection2"/>.</returns>
+        public static IServiceCollection2 Add(
+            this IServiceCollection2 collection,
+            IEnumerable<ServiceDescriptor2> descriptors)
         {
             if (collection == null)
             {
@@ -65,11 +65,11 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         /// Adds the specified <paramref name="descriptor"/> to the <paramref name="collection"/> if the
         /// service type hasn't been already registered.
         /// </summary>
-        /// <param name="collection">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptor">The <see cref="ServiceDescriptor"/>.</param>
+        /// <param name="collection">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptor">The <see cref="ServiceDescriptor2"/>.</param>
         public static void TryAdd(
-            this IServiceCollection collection,
-            ServiceDescriptor descriptor)
+            this IServiceCollection2 collection,
+            ServiceDescriptor2 descriptor)
         {
             if (collection == null)
             {
@@ -90,11 +90,11 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         /// Adds the specified <paramref name="descriptors"/> to the <paramref name="collection"/> if the
         /// service type hasn't been already registered.
         /// </summary>
-        /// <param name="collection">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptors">The <see cref="ServiceDescriptor"/>s.</param>
+        /// <param name="collection">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptors">The <see cref="ServiceDescriptor2"/>s.</param>
         public static void TryAdd(
-            this IServiceCollection collection,
-            IEnumerable<ServiceDescriptor> descriptors)
+            this IServiceCollection2 collection,
+            IEnumerable<ServiceDescriptor2> descriptors)
         {
             if (collection == null)
             {
@@ -113,7 +113,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         }
 
         public static void TryAddTransient(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service)
         {
             if (collection == null)
@@ -126,12 +126,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(service));
             }
 
-            var descriptor = ServiceDescriptor.Transient(service, service);
+            var descriptor = ServiceDescriptor2.Transient(service, service);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddTransient(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service,
             Type implementationType)
         {
@@ -150,12 +150,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(implementationType));
             }
 
-            var descriptor = ServiceDescriptor.Transient(service, implementationType);
+            var descriptor = ServiceDescriptor2.Transient(service, implementationType);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddTransient(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service,
             Func<IServiceProvider, object> implementationFactory)
         {
@@ -174,11 +174,11 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            var descriptor = ServiceDescriptor.Transient(service, implementationFactory);
+            var descriptor = ServiceDescriptor2.Transient(service, implementationFactory);
             TryAdd(collection, descriptor);
         }
 
-        public static void TryAddTransient<TService>(this IServiceCollection collection)
+        public static void TryAddTransient<TService>(this IServiceCollection2 collection)
             where TService : class
         {
             if (collection == null)
@@ -189,7 +189,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
             TryAddTransient(collection, typeof(TService), typeof(TService));
         }
 
-        public static void TryAddTransient<TService, TImplementation>(this IServiceCollection collection)
+        public static void TryAddTransient<TService, TImplementation>(this IServiceCollection2 collection)
             where TService : class
             where TImplementation : class, TService
         {
@@ -202,15 +202,15 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         }
 
         public static void TryAddTransient<TService>(
-            this IServiceCollection services,
+            this IServiceCollection2 services,
             Func<IServiceProvider, TService> implementationFactory)
             where TService : class
         {
-            services.TryAdd(ServiceDescriptor.Transient(implementationFactory));
+            services.TryAdd(ServiceDescriptor2.Transient(implementationFactory));
         }
 
         public static void TryAddScoped(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service)
         {
             if (collection == null)
@@ -223,12 +223,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(service));
             }
 
-            var descriptor = ServiceDescriptor.Scoped(service, service);
+            var descriptor = ServiceDescriptor2.Scoped(service, service);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddScoped(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service,
             Type implementationType)
         {
@@ -247,12 +247,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(implementationType));
             }
 
-            var descriptor = ServiceDescriptor.Scoped(service, implementationType);
+            var descriptor = ServiceDescriptor2.Scoped(service, implementationType);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddScoped(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service,
             Func<IServiceProvider, object> implementationFactory)
         {
@@ -271,11 +271,11 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            var descriptor = ServiceDescriptor.Scoped(service, implementationFactory);
+            var descriptor = ServiceDescriptor2.Scoped(service, implementationFactory);
             TryAdd(collection, descriptor);
         }
 
-        public static void TryAddScoped<TService>(this IServiceCollection collection)
+        public static void TryAddScoped<TService>(this IServiceCollection2 collection)
             where TService : class
         {
             if (collection == null)
@@ -286,7 +286,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
             TryAddScoped(collection, typeof(TService), typeof(TService));
         }
 
-        public static void TryAddScoped<TService, TImplementation>(this IServiceCollection collection)
+        public static void TryAddScoped<TService, TImplementation>(this IServiceCollection2 collection)
             where TService : class
             where TImplementation : class, TService
         {
@@ -299,15 +299,15 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
         }
 
         public static void TryAddScoped<TService>(
-            this IServiceCollection services,
+            this IServiceCollection2 services,
             Func<IServiceProvider, TService> implementationFactory)
             where TService : class
         {
-            services.TryAdd(ServiceDescriptor.Scoped(implementationFactory));
+            services.TryAdd(ServiceDescriptor2.Scoped(implementationFactory));
         }
 
         public static void TryAddSingleton(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service)
         {
             if (collection == null)
@@ -320,12 +320,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(service));
             }
 
-            var descriptor = ServiceDescriptor.Singleton(service, service);
+            var descriptor = ServiceDescriptor2.Singleton(service, service);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddSingleton(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service,
             Type implementationType)
         {
@@ -344,12 +344,12 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(implementationType));
             }
 
-            var descriptor = ServiceDescriptor.Singleton(service, implementationType);
+            var descriptor = ServiceDescriptor2.Singleton(service, implementationType);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddSingleton(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type service,
             Func<IServiceProvider, object> implementationFactory)
         {
@@ -368,11 +368,11 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            var descriptor = ServiceDescriptor.Singleton(service, implementationFactory);
+            var descriptor = ServiceDescriptor2.Singleton(service, implementationFactory);
             TryAdd(collection, descriptor);
         }
 
-        public static void TryAddSingleton<TService>(this IServiceCollection collection)
+        public static void TryAddSingleton<TService>(this IServiceCollection2 collection)
             where TService : class
         {
             if (collection == null)
@@ -383,7 +383,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
             TryAddSingleton(collection, typeof(TService), typeof(TService));
         }
 
-        public static void TryAddSingleton<TService, TImplementation>(this IServiceCollection collection)
+        public static void TryAddSingleton<TService, TImplementation>(this IServiceCollection2 collection)
             where TService : class
             where TImplementation : class, TService
         {
@@ -395,7 +395,7 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
             TryAddSingleton(collection, typeof(TService), typeof(TImplementation));
         }
 
-        public static void TryAddSingleton<TService>(this IServiceCollection collection, TService instance)
+        public static void TryAddSingleton<TService>(this IServiceCollection2 collection, TService instance)
             where TService : class
         {
             if (collection == null)
@@ -408,28 +408,28 @@ namespace Microsoft.Extensions.DependencyInjection.Extensions
                 throw new ArgumentNullException(nameof(instance));
             }
 
-            var descriptor = ServiceDescriptor.Singleton(typeof(TService), instance);
+            var descriptor = ServiceDescriptor2.Singleton(typeof(TService), instance);
             TryAdd(collection, descriptor);
         }
 
         public static void TryAddSingleton<TService>(
-            this IServiceCollection services,
+            this IServiceCollection2 services,
             Func<IServiceProvider, TService> implementationFactory)
             where TService : class
         {
-            services.TryAdd(ServiceDescriptor.Singleton(implementationFactory));
+            services.TryAdd(ServiceDescriptor2.Singleton(implementationFactory));
         }
 
         /// <summary>
-        /// Removes the first service in <see cref="IServiceCollection"/> with the same service type
+        /// Removes the first service in <see cref="IServiceCollection2"/> with the same service type
         /// as <paramref name="descriptor"/> and adds <paramef name="descriptor"/> to the collection.
         /// </summary>
-        /// <param name="collection">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="descriptor">The <see cref="ServiceDescriptor"/> to replace with.</param>
+        /// <param name="collection">The <see cref="IServiceCollection2"/>.</param>
+        /// <param name="descriptor">The <see cref="ServiceDescriptor2"/> to replace with.</param>
         /// <returns></returns>
-        public static IServiceCollection Replace(
-            this IServiceCollection collection,
-            ServiceDescriptor descriptor)
+        public static IServiceCollection2 Replace(
+            this IServiceCollection2 collection,
+            ServiceDescriptor2 descriptor)
         {
             if (collection == null)
             {

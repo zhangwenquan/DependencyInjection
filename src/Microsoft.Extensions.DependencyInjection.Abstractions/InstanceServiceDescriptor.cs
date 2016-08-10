@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace Microsoft.Extensions.DependencyInjection
 {
     [DebuggerDisplay("Lifetime = {Lifetime}, ServiceType = {ServiceType}, ImplementationInstance = {ImplementationInstance}")]
-    public class InstanceServiceDescriptor : ServiceDescriptor
+    public class InstanceServiceDescriptor : ServiceDescriptor2
     {
         /// <summary>
         /// Initializes a new instance of <see cref="InstanceServiceDescriptor"/> with the specified <paramref name="instance"/>

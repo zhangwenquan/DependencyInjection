@@ -6,12 +6,12 @@ using System.Collections.Generic;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public class EnumerableServiceDescriptor : ServiceDescriptor
+    public class EnumerableServiceDescriptor : ServiceDescriptor2
     {
         public EnumerableServiceDescriptor(Type serviceType) : base(serviceType, ServiceLifetime.Transient)
         {
         }
 
-        public IList<ServiceDescriptor> Descriptors { get; } = new List<ServiceDescriptor>();
+        public IList<ServiceDescriptor2> Descriptors { get; } = new List<ServiceDescriptor2>();
     }
 }

@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
 {
     public static class ServiceCollectionOrderedExtensions
     {
-        public static IServiceCollection AddOrdered<TService>(this IServiceCollection services)
+        public static IServiceCollection2 AddOrdered<TService>(this IServiceCollection2 services)
             where TService : class
         {
             if (services == null)
@@ -20,8 +20,8 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
             return services;
         }
 
-        public static IServiceCollection AddOrdered(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddOrdered(
+            this IServiceCollection2 services,
             Type serviceType)
         {
             if (services == null)
@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
             return services;
         }
 
-        public static IServiceCollection AddOrdered<TService, TImplementation>(this IServiceCollection services)
+        public static IServiceCollection2 AddOrdered<TService, TImplementation>(this IServiceCollection2 services)
             where TService : class
             where TImplementation : class, TService
         {
@@ -41,11 +41,11 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
                 throw new ArgumentNullException(nameof(services));
             }
 
-            return AddOrdered(services, (ServiceDescriptor) ServiceDescriptor.Transient(typeof(TService), typeof(TImplementation)));
+            return AddOrdered(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(typeof(TService), typeof(TImplementation)));
         }
 
-        public static IServiceCollection AddOrdered<TService>(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddOrdered<TService>(
+            this IServiceCollection2 services,
             TService implementationInstance)
             where TService : class
         {
@@ -59,11 +59,11 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
                 throw new ArgumentNullException(nameof(implementationInstance));
             }
 
-            return AddOrdered(services, (ServiceDescriptor) ServiceDescriptor.Singleton(typeof(TService), implementationInstance));
+            return AddOrdered(services, (ServiceDescriptor2) ServiceDescriptor2.Singleton(typeof(TService), implementationInstance));
         }
 
-        public static IServiceCollection AddOrdered(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddOrdered(
+            this IServiceCollection2 services,
             Type serviceType,
             object implementationInstance)
         {
@@ -82,11 +82,11 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
                 throw new ArgumentNullException(nameof(implementationInstance));
             }
 
-            return AddOrdered(services, (ServiceDescriptor) ServiceDescriptor.Singleton(serviceType, implementationInstance));
+            return AddOrdered(services, (ServiceDescriptor2) ServiceDescriptor2.Singleton(serviceType, implementationInstance));
         }
 
-        public static IServiceCollection AddOrdered(
-            this IServiceCollection services,
+        public static IServiceCollection2 AddOrdered(
+            this IServiceCollection2 services,
             Type serviceType,
             Type implementationType)
         {
@@ -105,11 +105,11 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
                 throw new ArgumentNullException(nameof(implementationType));
             }
 
-            return AddOrdered(services, (ServiceDescriptor) ServiceDescriptor.Transient(serviceType, implementationType));
+            return AddOrdered(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(serviceType, implementationType));
         }
 
-        public static IServiceCollection AddOrdered(
-           this IServiceCollection services,
+        public static IServiceCollection2 AddOrdered(
+           this IServiceCollection2 services,
            Type serviceType,
            Func<IServiceProvider, object> implementationFactory)
         {
@@ -128,11 +128,11 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            return AddOrdered(services, (ServiceDescriptor) ServiceDescriptor.Transient(serviceType, implementationFactory));
+            return AddOrdered(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(serviceType, implementationFactory));
         }
 
-        public static IServiceCollection AddOrdered<TService, TImplementation>(
-           this IServiceCollection services,
+        public static IServiceCollection2 AddOrdered<TService, TImplementation>(
+           this IServiceCollection2 services,
            Func<IServiceProvider, TImplementation> implementationFactory)
            where TService : class
            where TImplementation : class, TService
@@ -147,12 +147,12 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
                 throw new ArgumentNullException(nameof(implementationFactory));
             }
 
-            return AddOrdered(services, (ServiceDescriptor) ServiceDescriptor.Transient(typeof(TService), implementationFactory));
+            return AddOrdered(services, (ServiceDescriptor2) ServiceDescriptor2.Transient(typeof(TService), implementationFactory));
         }
 
-        public static IServiceCollection AddOrdered(
-            this IServiceCollection collection,
-            ServiceDescriptor descriptor)
+        public static IServiceCollection2 AddOrdered(
+            this IServiceCollection2 collection,
+            ServiceDescriptor2 descriptor)
         {
             if (collection == null)
             {
@@ -170,7 +170,7 @@ namespace Microsoft.Extensions.DependencyInjection.Ordered
         }
 
         private static OrderedEnumerableServiceDescriptor GetOrderedDescriptor(
-            this IServiceCollection collection,
+            this IServiceCollection2 collection,
             Type serviceType)
         {
             var descriptor = collection
