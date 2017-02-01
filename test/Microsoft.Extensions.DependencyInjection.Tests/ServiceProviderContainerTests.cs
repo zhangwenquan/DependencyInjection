@@ -10,10 +10,49 @@ using Xunit;
 
 namespace Microsoft.Extensions.DependencyInjection.Tests
 {
+    public class RootService { }
+
+    public class SubService
+    {
+        private readonly RootService rootServiceInstance;
+
+        public SubService(RootService rootServiceInstance)
+        {
+            this.rootServiceInstance = rootServiceInstance;
+        }
+    }
+
+    class SubServicesServiceProvider : ServiceProvider
+    {
+        private readonly IServiceProvider rootServiceProvider;
+
+        public SubServicesServiceProvider(IServiceProvider rootServiceProvider, IEnumerable<ServiceDescriptor> subServiceDescriptors, bool validateScopes)
+            : base(subServiceDescriptors, validateScopes)
+        {
+            this.rootServiceProvider = rootServiceProvider;
+        }
+
+        public override object GetService(Type serviceType) => base.GetService(serviceType) ?? rootServiceProvider?.GetService(serviceType);
+    }
+
+
     public class ServiceProviderContainerTests : DependencyInjectionSpecificationTests
     {
         protected override IServiceProvider CreateServiceProvider(IServiceCollection collection) =>
             collection.BuildServiceProvider();
+
+        [Fact]
+        public void Foo()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<RootService>();
+            var root = services.BuildServiceProvider();
+            var childServices = new ServiceCollection();
+            childServices.AddSingleton<SubService>();
+
+            var childSp = new SubServicesServiceProvider(root, childServices, validateScopes: false);
+            var sub = childSp.GetService<SubService>();
+        }
 
         [Fact]
         public void RethrowOriginalExceptionFromConstructor()
