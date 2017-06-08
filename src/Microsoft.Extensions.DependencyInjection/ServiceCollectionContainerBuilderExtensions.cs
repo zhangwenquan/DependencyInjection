@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static ServiceProvider BuildServiceProvider(this IServiceCollection services)
         {
-            return BuildServiceProvider(services, ServiceProviderOptions.Default);
+            return BuildServiceProvider(services, ServiceProviderOptions.Default1);
         }
 
         /// <summary>
